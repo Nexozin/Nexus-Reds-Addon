@@ -1,0 +1,8 @@
+{
+  "block.nexusreds.sequential_hopper": "Sequential Hopper",
+  "item.nexusreds.nexus_wrench": "Nexus Wrench",
+  "block.nexusreds.planter": "Planter",
+  "item.nexusreds.range_upgrade": "Range Upgrade",
+  "item.nexusreds.irrigation_upgrade": "Irrigation Upgrade",
+  "itemGroup.nexusreds.main_group": "Nexus Reds Addons"
+}

@@ -1,0 +1,29 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "CBC",
+    "EAE",
+    "DDD"
+  ],
+  "key": {
+    "A": {
+      "item": "minecraft:dispenser"
+    },
+    "B": {
+      "item": "minecraft:iron_hoe"
+    },
+    "C": {
+      "item": "minecraft:wheat_seeds"
+    },
+    "D": {
+      "item": "minecraft:redstone"
+    },
+    "E": {
+      "item": "minecraft:oak_planks"
+    }
+  },
+  "result": {
+    "id": "nexusreds:planter",
+    "count": 1
+  }
+}

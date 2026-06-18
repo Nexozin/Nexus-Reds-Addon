@@ -1,0 +1,26 @@
+{
+  "parent": "minecraft:block/block",
+  "textures": {
+    "down": "nexusreds:block/planter/triggered/side",
+    "up": "nexusreds:block/planter/triggered/top_arrow",
+    "north": "nexusreds:block/planter/triggered/front",
+    "south": "nexusreds:block/planter/triggered/back_indicator_alt",
+    "east": "nexusreds:block/planter/triggered/side",
+    "west": "nexusreds:block/planter/triggered/side",
+    "particle": "nexusreds:block/planter/triggered/front"
+  },
+  "elements": [
+    {
+      "from": [0, 0, 0],
+      "to": [16, 16, 16],
+      "faces": {
+        "north": {"uv": [0, 0, 16, 16], "texture": "#north", "cullface": "north"},
+				"east": {"uv": [16, 0, 0, 16], "texture": "#east", "cullface": "east"},
+				"south": {"uv": [0, 0, 16, 16], "texture": "#south", "cullface": "south"},
+				"west": {"uv": [0, 0, 16, 16], "texture": "#west", "cullface": "west"},
+				"up": {"uv": [0, 0, 16, 16], "texture": "#up", "cullface": "up"},
+				"down": {"uv": [16, 16, 0, 0], "texture": "#up", "cullface": "down"}
+      }
+    }
+  ]
+}

@@ -1,0 +1,25 @@
+{
+  "schemaVersion": 1,
+  "id": "nexusreds",
+  "version": "1.0.0",
+  "name": "Nexus Reds Addons",
+  "description": "Adiciona logistica avancada.",
+  "authors": ["Jonathan"],
+  "contact": {},
+  "license": "CC0-1.0",
+  "environment": "*",
+  "entrypoints": {
+    "main": [
+      "com.nexusreds.addons.NexusRedsMod"
+    ],
+    "client": [
+      "com.nexusreds.addons.NexusRedsClientMod"
+    ]
+  },
+  "depends": {
+    "fabricloader": ">=0.15.0",
+    "minecraft": "~1.21.1",
+    "java": ">=21",
+    "fabric-api": "*"
+  }
+}

@@ -1,0 +1,17 @@
+{
+  "variants": {
+    "facing=north,triggered=false": { "model": "nexusreds:block/planter" },
+    "facing=east,triggered=false":  { "model": "nexusreds:block/planter", "y": 90 },
+    "facing=south,triggered=false": { "model": "nexusreds:block/planter", "y": 180 },
+    "facing=west,triggered=false":  { "model": "nexusreds:block/planter", "y": 270 },
+    "facing=up,triggered=false":    { "model": "nexusreds:block/planter_vertical"},
+    "facing=down,triggered=false":  { "model": "nexusreds:block/planter_vertical", "x": 180 },
+
+    "facing=north,triggered=true": { "model": "nexusreds:block/planter_on" },
+    "facing=east,triggered=true":  { "model": "nexusreds:block/planter_on", "y": 90 },
+    "facing=south,triggered=true": { "model": "nexusreds:block/planter_on", "y": 180 },
+    "facing=west,triggered=true":  { "model": "nexusreds:block/planter_on", "y": 270 },
+    "facing=up,triggered=true":    { "model": "nexusreds:block/planter_vertical_on"},
+    "facing=down,triggered=true":  { "model": "nexusreds:block/planter_vertical_on", "x": 180 }
+  }
+}

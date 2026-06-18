@@ -1,0 +1,8 @@
+{
+  "replace": false,
+  "values": [
+    "nexusreds:upgrade_blank",
+    "nexusreds:range_upgrade",
+    "nexusreds:irrigation_upgrade"
+  ]
+}

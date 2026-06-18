@@ -1,0 +1,7 @@
+{
+  "replace": false,
+  "values": [
+    "nexusreds:sequential_hopper",
+    "nexusreds:planter"
+  ]
+}
