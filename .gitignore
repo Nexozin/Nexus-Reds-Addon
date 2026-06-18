@@ -3,3 +3,5 @@ build/
 run/
 .vscode/
 bin/
+blockbench models/
+photoshop models/
