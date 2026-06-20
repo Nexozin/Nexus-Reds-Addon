@@ -14,12 +14,12 @@ import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.inventory.Inventories;
 import net.minecraft.inventory.SidedInventory;
 import net.minecraft.item.HoeItem;
-import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.registry.RegistryWrapper;
 import net.minecraft.screen.NamedScreenHandlerFactory;
 import net.minecraft.screen.ScreenHandler;
+import net.minecraft.server.world.ServerWorld;
 import net.minecraft.text.Text;
 import net.minecraft.util.collection.DefaultedList;
 import net.minecraft.util.math.BlockPos;
@@ -36,58 +36,72 @@ public class PlanterBlockEntity extends BlockEntity implements SidedInventory, N
     private final DefaultedList<ItemStack> inventory = DefaultedList.ofSize(12, ItemStack.EMPTY);
     private static final int[] HOE_SLOT = {0};
     private static final int[] SEED_SLOTS = {1, 2, 3, 4, 5, 6, 7, 8, 9};
-    private int tickCounter = 0; // Relógio interno para a irrigação passiva
+    private int tickCounter = 0; 
 
     public PlanterBlockEntity(BlockPos pos, BlockState state) {
         super(NexusRedsMod.PLANTER_ENTITY, pos, state);
     }
 
-    // --- MÉTODOS AUXILIARES PARA OS UPGRADES ---
-    
-    public boolean hasUpgrade(Item upgradeItem) {
-        return this.getStack(10).isOf(upgradeItem) || this.getStack(11).isOf(upgradeItem);
+    // --- SISTEMA DE TIERS (NÍVEIS) ---
+    public int getRangeTier() {
+        if (this.getStack(10).isOf(ModItems.RANGE_UPGRADE_TIER_2) || this.getStack(11).isOf(ModItems.RANGE_UPGRADE_TIER_2)) return 2;
+        if (this.getStack(10).isOf(ModItems.RANGE_UPGRADE) || this.getStack(11).isOf(ModItems.RANGE_UPGRADE)) return 1;
+        return 0;
     }
 
+    public int getIrrigationTier() {
+        if (this.getStack(10).isOf(ModItems.IRRIGATION_UPGRADE_TIER_2) || this.getStack(11).isOf(ModItems.IRRIGATION_UPGRADE_TIER_2)) return 2;
+        if (this.getStack(10).isOf(ModItems.IRRIGATION_UPGRADE) || this.getStack(11).isOf(ModItems.IRRIGATION_UPGRADE)) return 1;
+        return 0;
+    }
+
+    // --- CÁLCULO DE ÁREA POR NÍVEL ---
     public List<BlockPos> getTargetArea(BlockPos pos, BlockState state) {
         List<BlockPos> targetPositions = new ArrayList<>();
         Direction facing = state.get(PlanterBlock.FACING);
+        int tier = getRangeTier();
         
-        if (!hasUpgrade(ModItems.RANGE_UPGRADE)) {
+        if (tier == 0) {
             if (facing == Direction.UP) targetPositions.add(pos.up(2));
             else targetPositions.add(pos.offset(facing));
-        } else {
+        } else if (tier == 1) { // 3x3 ou Linha de 5
             if (facing == Direction.UP || facing == Direction.DOWN) {
                 BlockPos center = (facing == Direction.UP) ? pos.up(2) : pos.down();
                 for (int x = -1; x <= 1; x++) {
-                    for (int z = -1; z <= 1; z++) {
-                        targetPositions.add(center.add(x, 0, z));
-                    }
+                    for (int z = -1; z <= 1; z++) targetPositions.add(center.add(x, 0, z));
                 }
             } else {
-                for (int i = 1; i <= 5; i++) {
-                    targetPositions.add(pos.offset(facing, i));
+                for (int i = 1; i <= 5; i++) targetPositions.add(pos.offset(facing, i));
+            }
+        } else if (tier == 2) { // 5x5 ou Linha de 7
+            if (facing == Direction.UP || facing == Direction.DOWN) {
+                BlockPos center = (facing == Direction.UP) ? pos.up(2) : pos.down();
+                // Loop de -2 a 2 cria uma grelha de 5x5
+                for (int x = -2; x <= 2; x++) {
+                    for (int z = -2; z <= 2; z++) targetPositions.add(center.add(x, 0, z));
                 }
+            } else {
+                for (int i = 1; i <= 7; i++) targetPositions.add(pos.offset(facing, i));
             }
         }
         return targetPositions;
     }
 
-    // --- VERIFICAÇÃO PARA O MIXIN ---
-    
+    // --- VERIFICAÇÃO DE ÁGUA (ATUALIZADO PARA 0.6.1) ---
     public boolean isAtivamenteIrrigando(WorldView world, BlockPos pos) {
-        if (!hasUpgrade(ModItems.IRRIGATION_UPGRADE)) return false;
+        int tier = getIrrigationTier();
         
-        // Reconhece tanto blocos de água pura quanto blocos encharcados (como folhas com água)
+        if (tier == 0) return false; // Sem upgrade
+        if (tier == 2) return true;  // Tier 2 mágico: não precisa de fonte de água!
+        
+        // Tier 1: Continua a precisar de água em volta
         for (Direction dir : Direction.values()) {
-            if (world.getFluidState(pos.offset(dir)).isOf(Fluids.WATER)) {
-                return true;
-            }
+            if (world.getFluidState(pos.offset(dir)).isOf(Fluids.WATER)) return true;
         }
         return false;
     }
 
-    // --- IRRIGAÇÃO PASSIVA ---
-    
+    // --- TICK (IRRIGAÇÃO E CRESCIMENTO 1.5x) ---
     public static void tick(World world, BlockPos pos, BlockState state, PlanterBlockEntity entity) {
         if (world.isClient) return;
 
@@ -95,15 +109,26 @@ public class PlanterBlockEntity extends BlockEntity implements SidedInventory, N
         if (entity.tickCounter >= 20) { // A cada 1 segundo
             entity.tickCounter = 0;
             
-            // Usamos o mesmo método do Mixin para verificar se tem água
             if (entity.isAtivamenteIrrigando(world, pos)) {
                 List<BlockPos> area = entity.getTargetArea(pos, state);
+                int irrigTier = entity.getIrrigationTier();
+                
                 for (BlockPos target : area) {
+                    // 1. Manter a Terra Molhada
                     BlockPos soloPos = target.down();
                     BlockState soloState = world.getBlockState(soloPos);
-                    
                     if (soloState.isOf(Blocks.FARMLAND) && soloState.get(FarmlandBlock.MOISTURE) < 7) {
                         world.setBlockState(soloPos, soloState.with(FarmlandBlock.MOISTURE, 7), 3);
+                    }
+
+                    // 2. Crescimento Mágico 1.5x (Apenas para Tier 2)
+                    if (irrigTier == 2 && world instanceof ServerWorld serverWorld) {
+                        BlockState cropState = world.getBlockState(target);
+                        if (cropState.getBlock() instanceof net.minecraft.block.CropBlock || cropState.getBlock() instanceof net.minecraft.block.NetherWartBlock) {
+                            if (serverWorld.getRandom().nextFloat() < 0.0075f) {
+                                cropState.randomTick(serverWorld, target, serverWorld.getRandom());
+                            }
+                        }
                     }
                 }
             }
@@ -111,7 +136,6 @@ public class PlanterBlockEntity extends BlockEntity implements SidedInventory, N
     }
 
     // --- LÓGICA DE PLANTIO (REDSTONE) ---
-    
     public void realizarPlantio(World world, BlockPos pos, BlockState state) {
         if (world.isClient) return;
         
@@ -125,7 +149,6 @@ public class PlanterBlockEntity extends BlockEntity implements SidedInventory, N
             BlockState cropState = world.getBlockState(currentCropPos);
             net.minecraft.block.Block cropBlock = cropState.getBlock();
             
-            // Colheita
             if (cropBlock instanceof net.minecraft.block.CropBlock crop) {
                 if (crop.isMature(cropState)) {
                     net.minecraft.block.Block.dropStacks(cropState, world, currentCropPos, world.getBlockEntity(currentCropPos), null, enxada);
@@ -142,7 +165,6 @@ public class PlanterBlockEntity extends BlockEntity implements SidedInventory, N
                 }
             }
 
-            // Plantio
             if (cropState.isAir() || cropState.isReplaceable()) {
                 for (int i = 1; i < 10; i++) {
                     ItemStack seedStack = this.getStack(i);
@@ -179,8 +201,7 @@ public class PlanterBlockEntity extends BlockEntity implements SidedInventory, N
         }
     }
 
-    // --- REGRAS DE INVENTÁRIO ---
-
+    // --- REGRAS DE INVENTÁRIO (FUNIS) ---
     @Override
     public int[] getAvailableSlots(Direction side) {
         Direction facing = this.getCachedState().get(PlanterBlock.FACING);
@@ -191,7 +212,6 @@ public class PlanterBlockEntity extends BlockEntity implements SidedInventory, N
     @Override
     public boolean canInsert(int slot, ItemStack stack, @Nullable Direction dir) {
         if (slot == 0) return stack.getItem() instanceof HoeItem;
-        if (slot == 10 || slot == 11) return stack.isOf(ModItems.RANGE_UPGRADE) || stack.isOf(ModItems.IRRIGATION_UPGRADE);
         return true; 
     }
 
@@ -201,7 +221,6 @@ public class PlanterBlockEntity extends BlockEntity implements SidedInventory, N
     }
 
     // --- MÉTODOS NBT PADRÃO ---
-
     @Override
     public void readNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup registryLookup) {
         super.readNbt(nbt, registryLookup);

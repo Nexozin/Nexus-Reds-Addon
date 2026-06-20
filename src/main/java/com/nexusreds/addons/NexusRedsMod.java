@@ -49,6 +49,8 @@ public class NexusRedsMod implements ModInitializer {
                 entries.add(com.nexusreds.addons.item.ModItems.UPGRADE_BLANK);
                 entries.add(com.nexusreds.addons.item.ModItems.RANGE_UPGRADE);
                 entries.add(ModItems.IRRIGATION_UPGRADE);
+                entries.add(ModItems.RANGE_UPGRADE_TIER_2);
+                entries.add(ModItems.IRRIGATION_UPGRADE_TIER_2);
             })
             .build();
 

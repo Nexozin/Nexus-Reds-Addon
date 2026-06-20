@@ -1,0 +1,20 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    " G ",
+    " U ",
+    " G "
+  ],
+  "key": {
+    "G": {
+      "item": "minecraft:gold_ingot"
+    },
+    "U": {
+      "item": "nexusreds:range_upgrade"
+    }
+  },
+  "result": {
+    "id": "nexusreds:range_upgrade_tier_2",
+    "count": 1
+  }
+}

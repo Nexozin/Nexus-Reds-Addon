@@ -24,52 +24,58 @@ public class PlanterScreenHandler extends ScreenHandler {
         this.inventory = inventory;
         inventory.onOpen(playerInventory.player);
 
-        // 1. Slot da Enxada (Index 0)
         this.addSlot(new Slot(inventory, 0, 23, 35) {
-            @Override
-            public boolean canInsert(ItemStack stack) {
-                return stack.getItem() instanceof HoeItem;
-            }
+            @Override public boolean canInsert(ItemStack stack) { return stack.getItem() instanceof HoeItem; }
         });
 
-        // 2. Slots das Sementes (Index 1 a 9)
         for (int m = 0; m < 3; ++m) {
             for (int l = 0; l < 3; ++l) {
                 this.addSlot(new Slot(inventory, 1 + l + m * 3, 62 + l * 18, 17 + m * 18));
             }
         }
 
-        // 3. Slot 10: Primeiro slot de Upgrade
+        // Slot 10: Verifica se o Slot 11 já tem um upgrade do mesmo tipo
         this.addSlot(new Slot(inventory, 10, 179, 14) {
             @Override
             public boolean canInsert(ItemStack stack) {
-                return stack.isOf(ModItems.RANGE_UPGRADE) || stack.isOf(ModItems.IRRIGATION_UPGRADE);
+                ItemStack outroSlot = inventory.getStack(11);
+                if (isRangeFamily(stack)) return !isRangeFamily(outroSlot);
+                if (isIrrigationFamily(stack)) return !isIrrigationFamily(outroSlot);
+                return false;
             }
-            @Override
-            public int getMaxItemCount() { return 1; }
+            @Override public int getMaxItemCount() { return 1; }
         });
 
-        // 4. Slot 11: Segundo slot de Upgrade
+        // Slot 11: Verifica se o Slot 10 já tem um upgrade do mesmo tipo
         this.addSlot(new Slot(inventory, 11, 179, 40) {
             @Override
             public boolean canInsert(ItemStack stack) {
-                return stack.isOf(ModItems.RANGE_UPGRADE) || stack.isOf(ModItems.IRRIGATION_UPGRADE); 
+                ItemStack outroSlot = inventory.getStack(10);
+                if (isRangeFamily(stack)) return !isRangeFamily(outroSlot);
+                if (isIrrigationFamily(stack)) return !isIrrigationFamily(outroSlot);
+                return false;
             }
-            @Override
-            public int getMaxItemCount() { return 1; }
+            @Override public int getMaxItemCount() { return 1; }
         });
 
-        // 5. Inventário do Jogador
         for (int m = 0; m < 3; ++m) {
             for (int l = 0; l < 9; ++l) {
                 this.addSlot(new Slot(playerInventory, l + m * 9 + 9, 8 + l * 18, 84 + m * 18));
             }
         }
 
-        // 6. Hotbar do Jogador
         for (int m = 0; m < 9; ++m) {
             this.addSlot(new Slot(playerInventory, m, 8 + m * 18, 142));
         }
+    }
+
+    // --- MÉTODOS AUXILIARES DE FAMÍLIA DE UPGRADES ---
+    private boolean isRangeFamily(ItemStack stack) {
+        return stack.isOf(ModItems.RANGE_UPGRADE) || stack.isOf(ModItems.RANGE_UPGRADE_TIER_2);
+    }
+
+    private boolean isIrrigationFamily(ItemStack stack) {
+        return stack.isOf(ModItems.IRRIGATION_UPGRADE) || stack.isOf(ModItems.IRRIGATION_UPGRADE_TIER_2);
     }
 
     @Override
@@ -87,12 +93,11 @@ public class PlanterScreenHandler extends ScreenHandler {
             newStack = originalStack.copy();
             
             if (invSlot < 12) { 
-                if (!this.insertItem(originalStack, 12, this.slots.size(), true)) {
-                    return ItemStack.EMPTY;
-                }
+                if (!this.insertItem(originalStack, 12, this.slots.size(), true)) return ItemStack.EMPTY;
             } else { 
-                // Permite o shift-click para os dois upgrades
-                if (originalStack.isOf(ModItems.RANGE_UPGRADE) || originalStack.isOf(ModItems.IRRIGATION_UPGRADE)) { 
+                // Se for um upgrade, tentamos enviar para os slots 10 e 11. 
+                // O insertItem respeita o canInsert, portanto não vai deixar duplicar!
+                if (isRangeFamily(originalStack) || isIrrigationFamily(originalStack)) { 
                     if (!this.insertItem(originalStack, 10, 12, false)) return ItemStack.EMPTY;
                 } else if (originalStack.getItem() instanceof HoeItem) { 
                     if (!this.insertItem(originalStack, 0, 1, false)) return ItemStack.EMPTY;
@@ -101,11 +106,8 @@ public class PlanterScreenHandler extends ScreenHandler {
                 }
             }
 
-            if (originalStack.isEmpty()) {
-                slot.setStack(ItemStack.EMPTY);
-            } else {
-                slot.markDirty();
-            }
+            if (originalStack.isEmpty()) slot.setStack(ItemStack.EMPTY);
+            else slot.markDirty();
         }
         return newStack;
     }

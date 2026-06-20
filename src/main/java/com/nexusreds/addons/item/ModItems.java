@@ -17,6 +17,8 @@ public class ModItems {
     public static final Item UPGRADE_BLANK = registerItem("upgrade_blank", new Item(new Item.Settings()));
     public static final Item RANGE_UPGRADE = registerItem("range_upgrade", new Item(new Item.Settings()));
     public static final Item IRRIGATION_UPGRADE = registerItem("irrigation_upgrade", new Item(new Item.Settings()));
+    public static final Item RANGE_UPGRADE_TIER_2 = registerItem("range_upgrade_tier_2", new Item(new Item.Settings()));
+    public static final Item IRRIGATION_UPGRADE_TIER_2 = registerItem("irrigation_upgrade_tier_2", new Item(new Item.Settings()));
 
 
     // --- MÉTODO AUXILIAR DE REGISTRO ---
