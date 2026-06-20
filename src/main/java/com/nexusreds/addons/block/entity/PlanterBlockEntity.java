@@ -25,6 +25,7 @@ import net.minecraft.util.collection.DefaultedList;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 import net.minecraft.world.World;
+import net.minecraft.world.WorldView;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
@@ -71,6 +72,20 @@ public class PlanterBlockEntity extends BlockEntity implements SidedInventory, N
         return targetPositions;
     }
 
+    // --- VERIFICAÇÃO PARA O MIXIN ---
+    
+    public boolean isAtivamenteIrrigando(WorldView world, BlockPos pos) {
+        if (!hasUpgrade(ModItems.IRRIGATION_UPGRADE)) return false;
+        
+        // Reconhece tanto blocos de água pura quanto blocos encharcados (como folhas com água)
+        for (Direction dir : Direction.values()) {
+            if (world.getFluidState(pos.offset(dir)).isOf(Fluids.WATER)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     // --- IRRIGAÇÃO PASSIVA ---
     
     public static void tick(World world, BlockPos pos, BlockState state, PlanterBlockEntity entity) {
@@ -80,28 +95,15 @@ public class PlanterBlockEntity extends BlockEntity implements SidedInventory, N
         if (entity.tickCounter >= 20) { // A cada 1 segundo
             entity.tickCounter = 0;
             
-            if (entity.hasUpgrade(ModItems.IRRIGATION_UPGRADE)) {
-                boolean isNearWater = false;
-                
-                for (Direction dir : Direction.values()) {
-                    BlockPos checkPos = pos.offset(dir);
+            // Usamos o mesmo método do Mixin para verificar se tem água
+            if (entity.isAtivamenteIrrigando(world, pos)) {
+                List<BlockPos> area = entity.getTargetArea(pos, state);
+                for (BlockPos target : area) {
+                    BlockPos soloPos = target.down();
+                    BlockState soloState = world.getBlockState(soloPos);
                     
-                    // A MÁGICA AQUI: getFluidState() reconhece água pura E água dentro de blocos (Folhas, Lajes, etc.)
-                    if (world.getFluidState(checkPos).isOf(Fluids.WATER)) {
-                        isNearWater = true;
-                        break;
-                    }
-                }
-
-                if (isNearWater) {
-                    List<BlockPos> area = entity.getTargetArea(pos, state);
-                    for (BlockPos target : area) {
-                        BlockPos soloPos = target.down();
-                        BlockState soloState = world.getBlockState(soloPos);
-                        
-                        if (soloState.isOf(Blocks.FARMLAND) && soloState.get(FarmlandBlock.MOISTURE) < 7) {
-                            world.setBlockState(soloPos, soloState.with(FarmlandBlock.MOISTURE, 7), 3);
-                        }
+                    if (soloState.isOf(Blocks.FARMLAND) && soloState.get(FarmlandBlock.MOISTURE) < 7) {
+                        world.setBlockState(soloPos, soloState.with(FarmlandBlock.MOISTURE, 7), 3);
                     }
                 }
             }
