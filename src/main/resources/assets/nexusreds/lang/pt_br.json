@@ -2,7 +2,19 @@
   "block.nexusreds.sequential_hopper": "Funil Sequencial",
   "item.nexusreds.nexus_wrench": "Chave Nexus",
   "block.nexusreds.planter": "Plantador",
-  "item.nexusreds.range_upgrade": "Upgrade de Area",
-  "item.nexusreds.irrigation_upgrade": "Upgrade de Irrigação",
-  "itemGroup.nexusreds.main_group": "Nexus Reds Addons"
+  "itemGroup.nexusreds.main_group": "Nexus Reds Addons",
+  "item.nexusreds.upgrade_blank": "Upgrade em Branco",
+  
+  "item.nexusreds.range_upgrade": "Melhoria de Alcance (Tier 1)",
+  "tooltip.nexusreds.range_upgrade": "Aumenta a área do Planter para 3x3 ou linha de 5.",
+  
+  "item.nexusreds.irrigation_upgrade": "Melhoria de Irrigação (Tier 1)",
+  "tooltip.nexusreds.irrigation_upgrade": "Mantém a terra hidratada se houver água adjacente.",
+  
+  "item.nexusreds.range_upgrade_tier_2": "Melhoria de Alcance (Tier 2)",
+  "tooltip.nexusreds.range_upgrade_tier_2": "Aumenta a área do Planter para 5x5 ou linha de 7.",
+  
+  "item.nexusreds.irrigation_upgrade_tier_2": "Melhoria de Irrigação (Tier 2)",
+  "tooltip.nexusreds.irrigation_upgrade_tier_2": "Gera água magicamente e nutre a terra.",
+  "tooltip.nexusreds.irrigation_upgrade_tier_2.extra": "Velocidade de crescimento: +50%"
 }

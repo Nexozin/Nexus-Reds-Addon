@@ -2,7 +2,19 @@
   "block.nexusreds.sequential_hopper": "Sequential Hopper",
   "item.nexusreds.nexus_wrench": "Nexus Wrench",
   "block.nexusreds.planter": "Planter",
-  "item.nexusreds.range_upgrade": "Range Upgrade",
-  "item.nexusreds.irrigation_upgrade": "Irrigation Upgrade",
-  "itemGroup.nexusreds.main_group": "Nexus Reds Addons"
+  "itemGroup.nexusreds.main_group": "Nexus Reds Addons",
+  "item.nexusreds.upgrade_blank": "Blank Upgrade",
+
+  "item.nexusreds.range_upgrade": "Range Upgrade (Tier 1)",
+  "tooltip.nexusreds.range_upgrade": "Increases Planter area to 3x3 or line of 5.",
+  
+  "item.nexusreds.irrigation_upgrade": "Irrigation Upgrade (Tier 1)",
+  "tooltip.nexusreds.irrigation_upgrade": "Keeps farmland hydrated if adjacent to water.",
+  
+  "item.nexusreds.range_upgrade_tier_2": "Range Upgrade (Tier 2)",
+  "tooltip.nexusreds.range_upgrade_tier_2": "Increases Planter area to 5x5 or line of 7.",
+  
+  "item.nexusreds.irrigation_upgrade_tier_2": "Irrigation Upgrade (Tier 2)",
+  "tooltip.nexusreds.irrigation_upgrade_tier_2": "Magically generates water and nourishes the soil.",
+  "tooltip.nexusreds.irrigation_upgrade_tier_2.extra": "Crop Growth Speed: +50%"
 }

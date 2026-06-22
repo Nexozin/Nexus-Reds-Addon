@@ -1,16 +1,22 @@
 {
   "type": "minecraft:crafting_shaped",
   "pattern": [
-    " L ",
-    " U ",
-    " L "
+    "GLG",
+    "LUL",
+    "GWG"
   ],
   "key": {
     "L": {
-      "item": "minecraft:lapis_block"
+      "item": "minecraft:bone_meal"
     },
     "U": {
       "item": "nexusreds:irrigation_upgrade"
+    },
+    "G": {
+      "item": "minecraft:gold_ingot"
+    },
+    "W": {
+      "item": "minecraft:water_bucket"
     }
   },
   "result": {
