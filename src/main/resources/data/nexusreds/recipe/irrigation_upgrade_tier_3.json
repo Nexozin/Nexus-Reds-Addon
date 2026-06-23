@@ -1,0 +1,23 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "DDD",
+    "BUB",
+    "DDD"
+  ],
+  "key": {
+    "U": {
+      "item": "nexusreds:irrigation_upgrade_tier_2"
+    },
+    "D": {
+      "item": "minecraft:diamond"
+    },
+    "B": {
+      "item": "minecraft:bone_block"
+    }
+  },
+  "result": {
+    "id": "nexusreds:irrigation_upgrade_tier_3",
+    "count": 1
+  }
+}

@@ -1,0 +1,19 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "B",
+    "H"
+  ],
+  "key": {
+    "H": {
+      "item": "minecraft:diamond_hoe"
+    },
+    "B": {
+        "item": "nexusreds:upgrade_blank"
+    }
+  },
+  "result": {
+    "id": "nexusreds:plower_upgrade",
+    "count": 1
+  }
+}
