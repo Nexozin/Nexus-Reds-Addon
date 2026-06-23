@@ -16,5 +16,15 @@
   
   "item.nexusreds.irrigation_upgrade_tier_2": "Irrigation Upgrade (Tier 2)",
   "tooltip.nexusreds.irrigation_upgrade_tier_2": "Magically generates water and nourishes the soil.",
-  "tooltip.nexusreds.irrigation_upgrade_tier_2.extra": "Crop Growth Speed: +50%"
+  "tooltip.nexusreds.irrigation_upgrade_tier_2.extra": "Crop Growth Speed: +50%",
+
+  "item.nexusreds.plower_upgrade": "Plower Upgrade",
+  "tooltip.nexusreds.plower_upgrade": "Automatically tills dirt and grass blocks broken by mobs.",
+
+  "item.nexusreds.range_upgrade_tier_3": "Supreme Range Upgrade (Tier 3)",
+  "tooltip.nexusreds.range_upgrade_tier_3": "Increases Planter area to 7x7 or line of 10.",
+  
+  "item.nexusreds.irrigation_upgrade_tier_3": "Supreme Irrigation Upgrade (Tier 3)",
+  "tooltip.nexusreds.irrigation_upgrade_tier_3": "Generates divine water and heavily nourishes the soil.",
+  "tooltip.nexusreds.irrigation_upgrade_tier_3.extra": "Crop Growth Speed: +150%"
 }

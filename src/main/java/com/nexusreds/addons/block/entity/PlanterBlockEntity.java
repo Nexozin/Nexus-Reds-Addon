@@ -14,6 +14,7 @@ import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.inventory.Inventories;
 import net.minecraft.inventory.SidedInventory;
 import net.minecraft.item.HoeItem;
+import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.registry.RegistryWrapper;
@@ -43,20 +44,26 @@ public class PlanterBlockEntity extends BlockEntity implements SidedInventory, N
         super(NexusRedsMod.PLANTER_ENTITY, pos, state);
     }
 
-    // --- SISTEMA DE TIERS (NÍVEIS) ---
+    public boolean hasUpgrade(Item upgradeItem) {
+        return this.getStack(10).isOf(upgradeItem) || this.getStack(11).isOf(upgradeItem);
+    }
+
+    // --- SISTEMA DE TIERS (NÍVEIS ATUALIZADO v0.7.0) ---
     public int getRangeTier() {
+        if (this.getStack(10).isOf(ModItems.RANGE_UPGRADE_TIER_3) || this.getStack(11).isOf(ModItems.RANGE_UPGRADE_TIER_3)) return 3;
         if (this.getStack(10).isOf(ModItems.RANGE_UPGRADE_TIER_2) || this.getStack(11).isOf(ModItems.RANGE_UPGRADE_TIER_2)) return 2;
         if (this.getStack(10).isOf(ModItems.RANGE_UPGRADE) || this.getStack(11).isOf(ModItems.RANGE_UPGRADE)) return 1;
         return 0;
     }
 
     public int getIrrigationTier() {
+        if (this.getStack(10).isOf(ModItems.IRRIGATION_UPGRADE_TIER_3) || this.getStack(11).isOf(ModItems.IRRIGATION_UPGRADE_TIER_3)) return 3;
         if (this.getStack(10).isOf(ModItems.IRRIGATION_UPGRADE_TIER_2) || this.getStack(11).isOf(ModItems.IRRIGATION_UPGRADE_TIER_2)) return 2;
         if (this.getStack(10).isOf(ModItems.IRRIGATION_UPGRADE) || this.getStack(11).isOf(ModItems.IRRIGATION_UPGRADE)) return 1;
         return 0;
     }
 
-    // --- CÁLCULO DE ÁREA POR NÍVEL ---
+    // --- CÁLCULO DE ÁREA DE ATUAÇÃO ---
     public List<BlockPos> getTargetArea(BlockPos pos, BlockState state) {
         List<BlockPos> targetPositions = new ArrayList<>();
         Direction facing = state.get(PlanterBlock.FACING);
@@ -83,24 +90,33 @@ public class PlanterBlockEntity extends BlockEntity implements SidedInventory, N
             } else {
                 for (int i = 1; i <= 7; i++) targetPositions.add(pos.offset(facing, i));
             }
+        } else if (tier == 3) { // TIER 3: GIGANTE 7x7 OU LINHA DE 10 BLOCOS
+            if (facing == Direction.UP || facing == Direction.DOWN) {
+                BlockPos center = (facing == Direction.UP) ? pos.up(2) : pos.down();
+                for (int x = -3; x <= 3; x++) {
+                    for (int z = -3; z <= 3; z++) targetPositions.add(center.add(x, 0, z));
+                }
+            } else {
+                for (int i = 1; i <= 10; i++) targetPositions.add(pos.offset(facing, i));
+            }
         }
         return targetPositions;
     }
 
-    // --- VERIFICAÇÃO DE ÁGUA ---
+    // --- VERIFICAÇÃO DE IRRIGAÇÃO ATIVA ---
     public boolean isAtivamenteIrrigando(WorldView world, BlockPos pos) {
         int tier = getIrrigationTier();
-        
         if (tier == 0) return false; 
-        if (tier == 2) return true;  
+        if (tier >= 2) return true; // Tier 2 e Tier 3 funcionam sem fonte externa de água!
         
+        // Apenas o Tier 1 exige blocos de água adjacentes
         for (Direction dir : Direction.values()) {
             if (world.getFluidState(pos.offset(dir)).isOf(Fluids.WATER)) return true;
         }
         return false;
     }
 
-    // --- TICK (IRRIGAÇÃO E CRESCIMENTO 1.5x) ---
+    // --- RELÓGIO PASSIVO (IRRIGAÇÃO E CRESCIMENTO ACELERADO) ---
     public static void tick(World world, BlockPos pos, BlockState state, PlanterBlockEntity entity) {
         if (world.isClient) return;
 
@@ -115,14 +131,21 @@ public class PlanterBlockEntity extends BlockEntity implements SidedInventory, N
                 for (BlockPos target : area) {
                     BlockPos soloPos = target.down();
                     BlockState soloState = world.getBlockState(soloPos);
+                    
+                    // Mantém a terra arada sempre molhada
                     if (soloState.isOf(Blocks.FARMLAND) && soloState.get(FarmlandBlock.MOISTURE) < 7) {
                         world.setBlockState(soloPos, soloState.with(FarmlandBlock.MOISTURE, 7), 3);
                     }
 
-                    if (irrigTier == 2 && world instanceof ServerWorld serverWorld) {
+                    // Lógica de Crescimento Mágico (Tier 2 = 1.5x, Tier 3 = 2.5x)
+                    if (irrigTier >= 2 && world instanceof ServerWorld serverWorld) {
                         BlockState cropState = world.getBlockState(target);
                         if (cropState.getBlock() instanceof net.minecraft.block.CropBlock || cropState.getBlock() instanceof net.minecraft.block.NetherWartBlock) {
-                            if (serverWorld.getRandom().nextFloat() < 0.0075f) {
+                            
+                            // Define a chance matemática de avanço de estágio baseado no Tier
+                            float magicChance = (irrigTier == 3) ? 0.0225f : 0.0075f;
+                            
+                            if (serverWorld.getRandom().nextFloat() < magicChance) {
                                 cropState.randomTick(serverWorld, target, serverWorld.getRandom());
                             }
                         }
@@ -132,7 +155,7 @@ public class PlanterBlockEntity extends BlockEntity implements SidedInventory, N
         }
     }
 
-    // --- LÓGICA DE PLANTIO (REDSTONE) ---
+    // --- LÓGICA DE ATIVAÇÃO POR REDSTONE (PLANTIO, COLHEITA E ARADO) ---
     public void realizarPlantio(World world, BlockPos pos, BlockState state) {
         if (world.isClient) return;
         
@@ -140,9 +163,30 @@ public class PlanterBlockEntity extends BlockEntity implements SidedInventory, N
         if (!(enxada.getItem() instanceof HoeItem)) return; 
 
         boolean realizouAcao = false;
+        boolean temPlower = hasUpgrade(ModItems.PLOWER_UPGRADE);
         List<BlockPos> targetPositions = getTargetArea(pos, state);
 
         for (BlockPos currentCropPos : targetPositions) {
+            
+            // 1. Lógica do Plower Upgrade (Arar Terra)
+            BlockPos soloPos = currentCropPos.down();
+            BlockState soloState = world.getBlockState(soloPos);
+            
+            if (temPlower && (soloState.isOf(Blocks.DIRT) || soloState.isOf(Blocks.GRASS_BLOCK) || soloState.isOf(Blocks.DIRT_PATH))) {
+                world.setBlockState(soloPos, Blocks.FARMLAND.getDefaultState());
+                
+                // Consome 0.3 de uso equivalente (30% de chance de gastar 1 de durabilidade)
+                if (enxada.isDamageable() && world.getRandom().nextFloat() < 0.3f) {
+                    enxada.setDamage(enxada.getDamage() + 1);
+                    if (enxada.getDamage() >= enxada.getMaxDamage()) {
+                        enxada.decrement(1);
+                        break; // A enxada quebrou, interrompe imediatamente!
+                    }
+                }
+                realizouAcao = true;
+            }
+
+            // 2. Colheita e Plantio Convencionais
             BlockState cropState = world.getBlockState(currentCropPos);
             net.minecraft.block.Block cropBlock = cropState.getBlock();
             
@@ -163,14 +207,11 @@ public class PlanterBlockEntity extends BlockEntity implements SidedInventory, N
                 }
             }
 
-            // Plantio (Agora Aleatório!)
+            // Plantio (Distribuição Aleatória)
             if (cropState.isAir() || cropState.isReplaceable()) {
-                
-                // Cria uma lista com os números dos slots (1 a 9) e embaralha
                 List<Integer> slotsAleatorios = new ArrayList<>(List.of(1, 2, 3, 4, 5, 6, 7, 8, 9));
                 Collections.shuffle(slotsAleatorios);
                 
-                // Em vez de i = 1; i < 10, usamos a nossa lista embaralhada
                 for (int i : slotsAleatorios) {
                     ItemStack seedStack = this.getStack(i);
                     if (seedStack.isEmpty()) continue;
@@ -197,6 +238,7 @@ public class PlanterBlockEntity extends BlockEntity implements SidedInventory, N
             }
         }
 
+        // Gasto normal de durabilidade ao colher/plantar
         if (realizouAcao && enxada.isDamageable()) {
             enxada.setDamage(enxada.getDamage() + 1);
             if (enxada.getDamage() >= enxada.getMaxDamage()) {

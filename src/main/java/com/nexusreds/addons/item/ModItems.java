@@ -38,6 +38,13 @@ public class ModItems {
         }
     });
 
+    public static final Item PLOWER_UPGRADE = registerItem("plower_upgrade", new Item(new Item.Settings()) {
+        @Override
+        public void appendTooltip(ItemStack stack, Item.TooltipContext context, List<Text> tooltip, TooltipType type) {
+            tooltip.add(Text.translatable("tooltip.nexusreds.plower_upgrade").formatted(Formatting.GRAY));
+        }
+    });
+
     // Upgrades de Tier 2
     public static final Item RANGE_UPGRADE_TIER_2 = registerItem("range_upgrade_tier_2", new Item(new Item.Settings()) {
         @Override
@@ -51,6 +58,22 @@ public class ModItems {
         public void appendTooltip(ItemStack stack, Item.TooltipContext context, List<Text> tooltip, TooltipType type) {
             tooltip.add(Text.translatable("tooltip.nexusreds.irrigation_upgrade_tier_2").formatted(Formatting.GRAY));
             tooltip.add(Text.translatable("tooltip.nexusreds.irrigation_upgrade_tier_2.extra").formatted(Formatting.GOLD));
+        }
+    });
+
+    // Upgrades de Tier 3
+    public static final Item RANGE_UPGRADE_TIER_3 = registerItem("range_upgrade_tier_3", new Item(new Item.Settings()) {
+        @Override
+        public void appendTooltip(ItemStack stack, Item.TooltipContext context, List<Text> tooltip, TooltipType type) {
+            tooltip.add(Text.translatable("tooltip.nexusreds.range_upgrade_tier_3").formatted(Formatting.GRAY));
+        }
+    });
+    
+    public static final Item IRRIGATION_UPGRADE_TIER_3 = registerItem("irrigation_upgrade_tier_3", new Item(new Item.Settings()) {
+        @Override
+        public void appendTooltip(ItemStack stack, Item.TooltipContext context, List<Text> tooltip, TooltipType type) {
+            tooltip.add(Text.translatable("tooltip.nexusreds.irrigation_upgrade_tier_3").formatted(Formatting.GRAY));
+            tooltip.add(Text.translatable("tooltip.nexusreds.irrigation_upgrade_tier_3.extra").formatted(Formatting.LIGHT_PURPLE)); // Lilás para destacar o Tier 3!
         }
     });
 
@@ -69,19 +92,11 @@ public class ModItems {
             entries.add(UPGRADE_BLANK);
             entries.add(RANGE_UPGRADE);
             entries.add(IRRIGATION_UPGRADE);
+            entries.add(PLOWER_UPGRADE);
             entries.add(RANGE_UPGRADE_TIER_2);
             entries.add(IRRIGATION_UPGRADE_TIER_2);
+            entries.add(RANGE_UPGRADE_TIER_3);
+            entries.add(IRRIGATION_UPGRADE_TIER_3);
         });
-        
-        // Se quiser que apareça também na aba de Redstone, basta descomentar as linhas abaixo:
-        /*
-        ItemGroupEvents.modifyEntriesEvent(ItemGroups.REDSTONE_BLOCKS).register(entries -> {
-            entries.add(UPGRADE_BLANK);
-            entries.add(RANGE_UPGRADE);
-            entries.add(IRRIGATION_UPGRADE);
-            entries.add(RANGE_UPGRADE_TIER_2);
-            entries.add(IRRIGATION_UPGRADE_TIER_2);
-        });
-        */
     }
 }

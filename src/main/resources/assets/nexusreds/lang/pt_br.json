@@ -16,5 +16,15 @@
   
   "item.nexusreds.irrigation_upgrade_tier_2": "Melhoria de Irrigação (Tier 2)",
   "tooltip.nexusreds.irrigation_upgrade_tier_2": "Gera água magicamente e nutre a terra.",
-  "tooltip.nexusreds.irrigation_upgrade_tier_2.extra": "Velocidade de crescimento: +50%"
+  "tooltip.nexusreds.irrigation_upgrade_tier_2.extra": "Velocidade de crescimento: +50%",
+
+  "item.nexusreds.plower_upgrade": "Melhoria de Arado",
+  "tooltip.nexusreds.plower_upgrade": "Ara automaticamente blocos de terra e grama quebrados por mobs.",
+
+  "item.nexusreds.range_upgrade_tier_3": "Melhoria de Alcance Supremo (Tier 3)",
+  "tooltip.nexusreds.range_upgrade_tier_3": "Aumenta a área do Planter para 7x7 ou linha de 10.",
+  
+  "item.nexusreds.irrigation_upgrade_tier_3": "Melhoria de Irrigação Suprema (Tier 3)",
+  "tooltip.nexusreds.irrigation_upgrade_tier_3": "Gera água divina e satura a terra de vida.",
+  "tooltip.nexusreds.irrigation_upgrade_tier_3.extra": "Velocidade de crescimento: +150%"
 }
