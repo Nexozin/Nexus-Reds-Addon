@@ -1,0 +1,44 @@
+{
+  "multipart": [
+    {
+      "when": { "is_joint": "false", "axis": "z" },
+      "apply": { "model": "nexusreds:block/copper_pipe_reds_inter" }
+    },
+    {
+      "when": { "is_joint": "false", "axis": "x" },
+      "apply": { "model": "nexusreds:block/copper_pipe_reds_inter", "y": 90 }
+    },
+    {
+      "when": { "is_joint": "false", "axis": "y" },
+      "apply": { "model": "nexusreds:block/copper_pipe_reds_inter", "x": 90 }
+    },
+    {
+      "when": { "is_joint": "true" },
+      "apply": { "model": "nexusreds:block/copper_pipe_reds_joint" }
+    },
+    {
+      "when": { "is_joint": "true", "north": "true" },
+      "apply": { "model": "nexusreds:block/copper_pipe_reds_north" }
+    },
+    {
+      "when": { "is_joint": "true", "east": "true" },
+      "apply": { "model": "nexusreds:block/copper_pipe_reds_east" }
+    },
+    {
+      "when": { "is_joint": "true", "south": "true" },
+      "apply": { "model": "nexusreds:block/copper_pipe_reds_south" }
+    },
+    {
+      "when": { "is_joint": "true", "west": "true" },
+      "apply": { "model": "nexusreds:block/copper_pipe_reds_west" }
+    },
+    {
+      "when": { "is_joint": "true", "up": "true" },
+      "apply": { "model": "nexusreds:block/copper_pipe_reds_up" }
+    },
+    {
+      "when": { "is_joint": "true", "down": "true" },
+      "apply": { "model": "nexusreds:block/copper_pipe_reds_down" }
+    }
+  ]
+}
