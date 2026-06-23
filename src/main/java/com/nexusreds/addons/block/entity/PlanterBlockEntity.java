@@ -29,6 +29,7 @@ import net.minecraft.world.WorldView;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 public class PlanterBlockEntity extends BlockEntity implements SidedInventory, NamedScreenHandlerFactory {
@@ -64,7 +65,7 @@ public class PlanterBlockEntity extends BlockEntity implements SidedInventory, N
         if (tier == 0) {
             if (facing == Direction.UP) targetPositions.add(pos.up(2));
             else targetPositions.add(pos.offset(facing));
-        } else if (tier == 1) { // 3x3 ou Linha de 5
+        } else if (tier == 1) { 
             if (facing == Direction.UP || facing == Direction.DOWN) {
                 BlockPos center = (facing == Direction.UP) ? pos.up(2) : pos.down();
                 for (int x = -1; x <= 1; x++) {
@@ -73,10 +74,9 @@ public class PlanterBlockEntity extends BlockEntity implements SidedInventory, N
             } else {
                 for (int i = 1; i <= 5; i++) targetPositions.add(pos.offset(facing, i));
             }
-        } else if (tier == 2) { // 5x5 ou Linha de 7
+        } else if (tier == 2) { 
             if (facing == Direction.UP || facing == Direction.DOWN) {
                 BlockPos center = (facing == Direction.UP) ? pos.up(2) : pos.down();
-                // Loop de -2 a 2 cria uma grelha de 5x5
                 for (int x = -2; x <= 2; x++) {
                     for (int z = -2; z <= 2; z++) targetPositions.add(center.add(x, 0, z));
                 }
@@ -87,14 +87,13 @@ public class PlanterBlockEntity extends BlockEntity implements SidedInventory, N
         return targetPositions;
     }
 
-    // --- VERIFICAÇÃO DE ÁGUA (ATUALIZADO PARA 0.6.1) ---
+    // --- VERIFICAÇÃO DE ÁGUA ---
     public boolean isAtivamenteIrrigando(WorldView world, BlockPos pos) {
         int tier = getIrrigationTier();
         
-        if (tier == 0) return false; // Sem upgrade
-        if (tier == 2) return true;  // Tier 2 mágico: não precisa de fonte de água!
+        if (tier == 0) return false; 
+        if (tier == 2) return true;  
         
-        // Tier 1: Continua a precisar de água em volta
         for (Direction dir : Direction.values()) {
             if (world.getFluidState(pos.offset(dir)).isOf(Fluids.WATER)) return true;
         }
@@ -106,7 +105,7 @@ public class PlanterBlockEntity extends BlockEntity implements SidedInventory, N
         if (world.isClient) return;
 
         entity.tickCounter++;
-        if (entity.tickCounter >= 20) { // A cada 1 segundo
+        if (entity.tickCounter >= 20) { 
             entity.tickCounter = 0;
             
             if (entity.isAtivamenteIrrigando(world, pos)) {
@@ -114,14 +113,12 @@ public class PlanterBlockEntity extends BlockEntity implements SidedInventory, N
                 int irrigTier = entity.getIrrigationTier();
                 
                 for (BlockPos target : area) {
-                    // 1. Manter a Terra Molhada
                     BlockPos soloPos = target.down();
                     BlockState soloState = world.getBlockState(soloPos);
                     if (soloState.isOf(Blocks.FARMLAND) && soloState.get(FarmlandBlock.MOISTURE) < 7) {
                         world.setBlockState(soloPos, soloState.with(FarmlandBlock.MOISTURE, 7), 3);
                     }
 
-                    // 2. Crescimento Mágico 1.5x (Apenas para Tier 2)
                     if (irrigTier == 2 && world instanceof ServerWorld serverWorld) {
                         BlockState cropState = world.getBlockState(target);
                         if (cropState.getBlock() instanceof net.minecraft.block.CropBlock || cropState.getBlock() instanceof net.minecraft.block.NetherWartBlock) {
@@ -149,6 +146,7 @@ public class PlanterBlockEntity extends BlockEntity implements SidedInventory, N
             BlockState cropState = world.getBlockState(currentCropPos);
             net.minecraft.block.Block cropBlock = cropState.getBlock();
             
+            // Colheita
             if (cropBlock instanceof net.minecraft.block.CropBlock crop) {
                 if (crop.isMature(cropState)) {
                     net.minecraft.block.Block.dropStacks(cropState, world, currentCropPos, world.getBlockEntity(currentCropPos), null, enxada);
@@ -165,8 +163,15 @@ public class PlanterBlockEntity extends BlockEntity implements SidedInventory, N
                 }
             }
 
+            // Plantio (Agora Aleatório!)
             if (cropState.isAir() || cropState.isReplaceable()) {
-                for (int i = 1; i < 10; i++) {
+                
+                // Cria uma lista com os números dos slots (1 a 9) e embaralha
+                List<Integer> slotsAleatorios = new ArrayList<>(List.of(1, 2, 3, 4, 5, 6, 7, 8, 9));
+                Collections.shuffle(slotsAleatorios);
+                
+                // Em vez de i = 1; i < 10, usamos a nossa lista embaralhada
+                for (int i : slotsAleatorios) {
                     ItemStack seedStack = this.getStack(i);
                     if (seedStack.isEmpty()) continue;
 
